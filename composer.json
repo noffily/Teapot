@@ -8,5 +8,8 @@
             "email": "noffily@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "php": ">=7.4",
+        "psr/http-message": "^1.0"
+    }
 }
