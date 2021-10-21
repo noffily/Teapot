@@ -1,0 +1,12 @@
+{
+    "name": "noffily/psr7-test",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrey Chepurnoy",
+            "email": "noffily@gmail.com"
+        }
+    ],
+    "require": {}
+}
