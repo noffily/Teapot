@@ -8,7 +8,7 @@ use PHPUnit\Framework\Assert;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class Result
+class Result
 {
     private ServerRequestInterface $request;
     private ResponseInterface $response;
@@ -20,14 +20,23 @@ final class Result
     }
 
     /**
-     * Checks that response code is equal to value provided.
-     *
+     * Checks that response code is equal to provided value.
      * @param int $code
      * @param string $message
      */
-    public function seeResponseCodeIs(int $code, string $message = ''):void
+    public function seeResponseCodeIs(int $code, string $message = ''): void
     {
         Assert::assertEquals($code, $this->getResponse()->getStatusCode(), $message);
+    }
+
+    /**
+     * Checks that response body contents matches the one provided
+     * @param string $contents
+     * @param string $message
+     */
+    public function seeResponseBodyContentsIs(string $contents, string $message = ''): void
+    {
+        Assert::assertSame($contents, $this->getResponseContent(), $message);
     }
 
     protected function getRequest(): ServerRequestInterface
@@ -38,5 +47,11 @@ final class Result
     protected function getResponse(): ResponseInterface
     {
         return $this->response;
+    }
+
+    private function getResponseContent(): string
+    {
+        $this->response->getBody()->isSeekable() && $this->response->getBody()->rewind();
+        return $this->response->getBody()->getContents();
     }
 }
