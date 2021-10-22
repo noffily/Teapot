@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Noffily\Psr7\Test;
+namespace Noffily\Teapot;
 
 use Psr\Http\Message\ServerRequestInterface;
 

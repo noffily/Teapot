@@ -1,5 +1,5 @@
 {
-    "name": "noffily/psr7-test",
+    "name": "noffily/teapot",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Noffily\\Psr7\\Test\\": "src/"
+            "Noffily\\Teapot\\": "src/"
         }
     }
 }
