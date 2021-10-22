@@ -8,7 +8,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class Runner
 {
-    private array $requests = [];
+    private ServerRequestInterface $request;
     private Emitter $emitter;
 
     public function __construct(Emitter $emitter)
@@ -18,21 +18,12 @@ final class Runner
 
     public function addRequest(ServerRequestInterface $request): void
     {
-        $this->requests[] = $request;
+        $this->request = $request;
     }
 
-    /**
-     * @return array<Result>
-     */
-    public function execute(): array
+    public function execute(): Result
     {
-        $results = [];
         $emitter = $this->emitter;
-
-        foreach ($this->requests as $request) {
-            $results[] = new Result($request, $emitter($request));
-        }
-
-        return $results;
+        return new Result($this->request, $emitter($this->request));
     }
 }
