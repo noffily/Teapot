@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Noffily\\Teapot\\": "src/"
+            "Noffily\\Teapot\\": ""
         }
     }
 }
