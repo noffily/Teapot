@@ -20,7 +20,7 @@ final class ResponseAdapterFactory
     public function create(): ResponseAdapterInterface
     {
         if ($this->response instanceof PsrResponse) {
-            return new Prs7ResponseAdapter($this->response);
+            return new Psr7ResponseAdapter($this->response);
         }
 
         if ($this->response instanceof SymfonyResponse) {

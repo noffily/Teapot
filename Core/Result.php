@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace Noffily\Teapot\Core;
 
 use PHPUnit\Framework\Assert;
-use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class Result
 {
-    private PsrServerRequest|SymfonyRequest $request;
+    private Request $request;
     private Response $response;
 
-    public function __construct(PsrServerRequest|SymfonyRequest $request, Response $response)
+    public function __construct(Request $request, Response $response)
     {
         $this->request = $request;
         $this->response = $response;
@@ -40,7 +39,7 @@ class Result
         Assert::assertSame($contents, $this->getResponse()->getContent(), $message);
     }
 
-    protected function getRequest(): PsrServerRequest|SymfonyRequest
+    protected function getRequest(): Request
     {
         return $this->request;
     }

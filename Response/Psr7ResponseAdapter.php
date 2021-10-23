@@ -7,7 +7,7 @@ namespace Noffily\Teapot\Response;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 
-final class Prs7ResponseAdapter implements ResponseAdapterInterface
+final class Psr7ResponseAdapter implements ResponseAdapterInterface
 {
     private PsrResponse $response;
 
