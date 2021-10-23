@@ -22,7 +22,7 @@ final class Psr7RequestAdapter implements RequestAdapterInterface
 
         return new SymfonyRequest(
             $this->request->getQueryParams(),
-            $this->request->getParsedBody(),
+            (array) $this->request->getParsedBody(),
             $this->request->getAttributes(),
             $this->request->getCookieParams(),
             $this->request->getUploadedFiles(),
