@@ -2,18 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Noffily\Teapot;
+namespace Noffily\Teapot\Core;
 
 use PHPUnit\Framework\Assert;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Response;
 
 class Result
 {
-    private ServerRequestInterface $request;
-    private ResponseInterface $response;
+    private PsrServerRequest|SymfonyRequest $request;
+    private Response $response;
 
-    public function __construct(ServerRequestInterface $request, ResponseInterface $response)
+    public function __construct(PsrServerRequest|SymfonyRequest $request, Response $response)
     {
         $this->request = $request;
         $this->response = $response;
@@ -36,22 +37,16 @@ class Result
      */
     public function seeResponseBodyContentsIs(string $contents, string $message = ''): void
     {
-        Assert::assertSame($contents, $this->getResponseContent(), $message);
+        Assert::assertSame($contents, $this->getResponse()->getContent(), $message);
     }
 
-    protected function getRequest(): ServerRequestInterface
+    protected function getRequest(): PsrServerRequest|SymfonyRequest
     {
         return $this->request;
     }
 
-    protected function getResponse(): ResponseInterface
+    protected function getResponse(): Response
     {
         return $this->response;
-    }
-
-    private function getResponseContent(): string
-    {
-        $this->response->getBody()->isSeekable() && $this->response->getBody()->rewind();
-        return $this->response->getBody()->getContents();
     }
 }
