@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Noffily\Teapot\Core;
 
-use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
-use Noffily\Teapot\Response\ResponseAdapterFactory;
+use Psr\Http\Message\ResponseInterface;
 use Closure;
 
 final class Emitter
@@ -18,9 +16,9 @@ final class Emitter
         $this->responseEmitter = $responseEmitter;
     }
 
-    public function __invoke(PsrServerRequest|SymfonyRequest $serverRequest): ResponseAdapterFactory
+    public function __invoke($serverRequest): ResponseInterface
     {
         $responseEmitter = $this->responseEmitter;
-        return new ResponseAdapterFactory($responseEmitter($serverRequest));
+        return $responseEmitter($serverRequest);
     }
 }

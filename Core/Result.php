@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace Noffily\Teapot\Core;
 
 use PHPUnit\Framework\Assert;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Psr\Http\Message\ResponseInterface;
 
 class Result
 {
-    private Request $request;
-    private Response $response;
+    private $request;
+    private ResponseInterface $response;
 
-    public function __construct(Request $request, Response $response)
+    public function __construct($request, ResponseInterface $response)
     {
         $this->request = $request;
         $this->response = $response;
@@ -36,16 +35,22 @@ class Result
      */
     public function seeResponseBodyContentsIs(string $contents, string $message = ''): void
     {
-        Assert::assertSame($contents, $this->getResponse()->getContent(), $message);
+        Assert::assertSame($contents, $this->getResponseContent(), $message);
     }
 
-    protected function getRequest(): Request
+    protected function getRequest()
     {
         return $this->request;
     }
 
-    protected function getResponse(): Response
+    protected function getResponse(): ResponseInterface
     {
         return $this->response;
+    }
+
+    protected function getResponseContent(): string
+    {
+        $this->getResponse()->getBody()->isSeekable() && $this->getResponse()->getBody()->rewind();
+        return $this->getResponse()->getBody()->getContents();
     }
 }
