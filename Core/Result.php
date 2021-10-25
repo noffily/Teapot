@@ -9,12 +9,10 @@ use Psr\Http\Message\ResponseInterface;
 
 class Result
 {
-    private $request;
     private ResponseInterface $response;
 
-    public function __construct($request, ResponseInterface $response)
+    public function __construct(ResponseInterface $response)
     {
-        $this->request = $request;
         $this->response = $response;
     }
 
@@ -36,11 +34,6 @@ class Result
     public function seeResponseBodyContentsIs(string $contents, string $message = ''): void
     {
         Assert::assertSame($contents, $this->getResponseContent(), $message);
-    }
-
-    protected function getRequest()
-    {
-        return $this->request;
     }
 
     protected function getResponse(): ResponseInterface

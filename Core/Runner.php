@@ -16,6 +16,6 @@ final class Runner
     public function execute($request): Result
     {
         $emitter = $this->emitter;
-        return new Result($request, $emitter($request));
+        return new Result($emitter($request));
     }
 }
