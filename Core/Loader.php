@@ -7,6 +7,7 @@ namespace Noffily\Teapot\Core;
 use Throwable;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionException;
 use SebastianBergmann\FileIterator\Facade;
 
 final class Loader
@@ -21,15 +22,15 @@ final class Loader
         $tests = [];
         foreach ($files as $file) {
             include_once $file;
-
-            $tests = array_diff(get_declared_classes(), $declaredClasses);
         }
-        $tests = array_values($tests);
-
-        $loaded = [];
+        $tests = array_values(array_diff(get_declared_classes(), $declaredClasses));
 
         foreach ($tests as $test) {
-            $class = new ReflectionClass($test);
+            try {
+                $class = new ReflectionClass($test);
+            } catch (ReflectionException) {
+                continue;
+            }
 
             if ($class->isAbstract() || $class->getConstructor()?->getNumberOfRequiredParameters() > 0) {
                 continue;
@@ -67,7 +68,7 @@ final class Loader
         return $this->tests;
     }
 
-    public function execute(Runner $runner)
+    public function execute(Runner $runner): void
     {
         // todo move it to another class
         foreach ($this->tests as $item) {
