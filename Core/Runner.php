@@ -13,7 +13,7 @@ final class Runner
         $this->emitter = $emitter;
     }
 
-    public function execute($request): Result
+    public function execute(mixed $request): Result
     {
         $emitter = $this->emitter;
         return new Result($emitter($request));
