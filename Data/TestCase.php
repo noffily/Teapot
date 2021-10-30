@@ -9,7 +9,7 @@ final class TestCase
     private string $test;
     private array $cases;
 
-    public function __construct(string $test, array $cases)
+    public function __construct(string $test, array $cases = [])
     {
         $this->test = $test;
         $this->cases = $cases;

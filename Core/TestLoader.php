@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Noffily\Teapot\Core;
 
 use Throwable;
+use Exception;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionException;
@@ -14,79 +15,89 @@ use Noffily\Teapot\Data\TestCase;
 
 final class TestLoader
 {
-    /** @var array<TestCase>  */
-    private array $tests = [];
+    private Config $config;
+    private Facade $facade;
 
-    public function __construct(Config $config)
+    public function __construct(Config $config, Facade $facade)
     {
-        // todo: need to be extracted
-        $files = (new Facade())->getFilesAsArray(
-            $config->getDirectory(),
-            $config->getSuffix(),
-            $config->getPrefix(),
-            $config->getExclude()
+        $this->config = $config;
+        $this->facade = $facade;
+    }
+
+    /**
+     * @return array<TestCase>
+     */
+    public function getTests(): array
+    {
+        $testClasses = $this->getTestClasses();
+        $tests = [];
+        foreach ($testClasses as $testClass) {
+            try {
+                $tests[] = $this->getTestCase($testClass);
+            } catch (Throwable) {
+                continue;
+            }
+        }
+        return $tests;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getTestClasses(): array
+    {
+        $files = $this->facade->getFilesAsArray(
+            $this->config->getDirectory(),
+            $this->config->getSuffix(),
+            $this->config->getPrefix(),
+            $this->config->getExclude()
         );
         $declaredClasses = get_declared_classes();
         $tests = [];
         foreach ($files as $file) {
             include_once $file;
         }
-        $tests = array_values(array_diff(get_declared_classes(), $declaredClasses));
-
-        foreach ($tests as $test) {
-            try {
-                $class = new ReflectionClass($test);
-            } catch (ReflectionException) {
-                continue;
-            }
-
-            if ($class->isAbstract() || $class->getConstructor()?->getNumberOfRequiredParameters() > 0) {
-                continue;
-            }
-
-            $cases = [];
-            $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
-            foreach ($methods as $method) {
-
-                if ($method->getNumberOfParameters() < 1 || $method->getNumberOfRequiredParameters() > 1) {
-                    continue 2;
-                }
-
-                if ($method->getParameters()[0]->getType()?->getName() !== RequestEmitter::class) {
-                    continue 2;
-                }
-
-                $cases[] = $method->getName();
-            }
-
-            if (empty($cases)) {
-                continue;
-            }
-
-            // todo: test must be a collection object
-            $this->tests[] = new TestCase($test, $cases);
-        }
+        return array_values(array_diff(get_declared_classes(), $declaredClasses));
     }
 
-    public function getTests(): array
+    /**
+     * @param string $test
+     * @return TestCase
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    protected function getTestCase(string $test): TestCase
     {
-        return $this->tests;
+        $class = new ReflectionClass($test);
+        if ($class->isAbstract() || $class->getConstructor()?->getNumberOfRequiredParameters() > 0) {
+            throw new Exception(sprintf(
+            'Test class %s must not be an abstract and must have no required parameters.',
+                $test
+            ));
+        }
+
+        return new TestCase($test, $this->getTestMethods($class));
     }
 
-    public function execute(RequestEmitter $runner): void
+    /**
+     * @param ReflectionClass $class
+     * @return array
+     */
+    protected function getTestMethods(ReflectionClass $class): array
     {
-        // todo move it to another class
-        foreach ($this->tests as $item) {
-            $test = $item->getTest();
-            $testClass = new $test();
-            foreach ($item->getCases() as $case) {
-                try {
-                    $testClass->$case($runner);
-                    echo sprintf('%s::%s: OK!', $test, $case) . PHP_EOL;
-                } catch (Throwable) {
-                    echo sprintf('%s::%s: FAILED!', $test, $case) . PHP_EOL;
-                }
+        $cases = [];
+        foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+
+            if ($method->getNumberOfParameters() < 1 || $method->getNumberOfRequiredParameters() > 1) {
+                continue;
             }
+
+            if ($method->getParameters()[0]->getType()?->getName() !== RequestEmitter::class) {
+                continue;
+            }
+
+            $cases[] = $method->getName();
         }
+        return $cases;
     }
 }
