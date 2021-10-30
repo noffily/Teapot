@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Noffily\Teapot\Core;
 
+use Noffily\Teapot\Data\Response;
+
 final class Runner
 {
     private Emitter $emitter;
@@ -16,6 +18,6 @@ final class Runner
     public function execute(mixed $request): Result
     {
         $emitter = $this->emitter;
-        return new Result($emitter($request));
+        return new Result(new Response($emitter($request)));
     }
 }

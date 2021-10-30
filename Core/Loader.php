@@ -9,15 +9,23 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionException;
 use SebastianBergmann\FileIterator\Facade;
+use Noffily\Teapot\Data\Config;
+use Noffily\Teapot\Data\TestCase;
 
 final class Loader
 {
+    /** @var array<TestCase>  */
     private array $tests = [];
 
-    public function __construct(string $directory, string $prefix = '', string $suffix = '.php', array $exclude = [])
+    public function __construct(Config $config)
     {
         // todo: need to be extracted
-        $files = (new Facade())->getFilesAsArray($directory, $suffix, $prefix, $exclude);
+        $files = (new Facade())->getFilesAsArray(
+            $config->getDirectory(),
+            $config->getSuffix(),
+            $config->getPrefix(),
+            $config->getExclude()
+        );
         $declaredClasses = get_declared_classes();
         $tests = [];
         foreach ($files as $file) {
@@ -36,7 +44,7 @@ final class Loader
                 continue;
             }
 
-            $testCases = [];
+            $cases = [];
             $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
             foreach ($methods as $method) {
 
@@ -48,18 +56,15 @@ final class Loader
                     continue 2;
                 }
 
-                $testCases[] = $method->getName();
+                $cases[] = $method->getName();
             }
 
-            if (empty($testCases)) {
+            if (empty($cases)) {
                 continue;
             }
 
-            // todo: needs to be an object
-            $this->tests[] = [
-                'test' => $test,
-                'cases' => $testCases,
-            ];
+            // todo: test must be a collection object
+            $this->tests[] = new TestCase($test, $cases);
         }
     }
 
@@ -72,11 +77,9 @@ final class Loader
     {
         // todo move it to another class
         foreach ($this->tests as $item) {
-            $test = $item['test'];
-            $cases = $item['cases'];
-
+            $test = $item->getTest();
             $testClass = new $test();
-            foreach ($cases as $case) {
+            foreach ($item->getCases() as $case) {
                 try {
                     $testClass->$case($runner);
                     echo sprintf('%s::%s: OK!', $test, $case) . PHP_EOL;

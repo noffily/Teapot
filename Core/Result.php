@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Noffily\Teapot\Core;
 
 use PHPUnit\Framework\Assert;
-use Psr\Http\Message\ResponseInterface;
+use Noffily\Teapot\Data\Response;
 
 class Result
 {
-    private ResponseInterface $response;
+    private Response $response;
 
-    public function __construct(ResponseInterface $response)
+    public function __construct(Response $response)
     {
         $this->response = $response;
     }
@@ -33,17 +33,11 @@ class Result
      */
     public function seeResponseBodyContentsIs(string $contents, string $message = ''): void
     {
-        Assert::assertSame($contents, $this->getResponseContent(), $message);
+        Assert::assertSame($contents, $this->getResponse()->getBodyContents(), $message);
     }
 
-    protected function getResponse(): ResponseInterface
+    protected function getResponse(): Response
     {
         return $this->response;
-    }
-
-    protected function getResponseContent(): string
-    {
-        $this->getResponse()->getBody()->isSeekable() && $this->getResponse()->getBody()->rewind();
-        return $this->getResponse()->getBody()->getContents();
     }
 }
