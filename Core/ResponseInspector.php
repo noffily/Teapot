@@ -7,7 +7,7 @@ namespace Noffily\Teapot\Core;
 use PHPUnit\Framework\Assert;
 use Noffily\Teapot\Data\Response;
 
-class Result
+class ResponseInspector
 {
     private Response $response;
 

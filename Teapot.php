@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace Noffily\Teapot;
 
-use Noffily\Teapot\Core\Loader;
-use Noffily\Teapot\Core\Runner;
+use Noffily\Teapot\Core\TestLoader;
+use Noffily\Teapot\Core\RequestEmitter;
 use Noffily\Teapot\Data\Config;
 
 final class Teapot
 {
-    private Runner $runner;
-    private Loader $loader;
+    private RequestEmitter $requestEmitter;
+    private TestLoader $loader;
 
-    public function __construct(Runner $runner, Config $config)
+    public function __construct(RequestEmitter $requestEmitter, Config $config)
     {
-        $this->runner = $runner;
-        $this->loader = new Loader($config);
+        $this->requestEmitter = $requestEmitter;
+        $this->loader = new TestLoader($config);
     }
 
     public function run(): void
     {
-        $this->loader->execute($this->runner);
+        $this->loader->execute($this->requestEmitter);
     }
 }

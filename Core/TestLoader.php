@@ -12,7 +12,7 @@ use SebastianBergmann\FileIterator\Facade;
 use Noffily\Teapot\Data\Config;
 use Noffily\Teapot\Data\TestCase;
 
-final class Loader
+final class TestLoader
 {
     /** @var array<TestCase>  */
     private array $tests = [];
@@ -52,7 +52,7 @@ final class Loader
                     continue 2;
                 }
 
-                if ($method->getParameters()[0]->getType()?->getName() !== Runner::class) {
+                if ($method->getParameters()[0]->getType()?->getName() !== RequestEmitter::class) {
                     continue 2;
                 }
 
@@ -73,7 +73,7 @@ final class Loader
         return $this->tests;
     }
 
-    public function execute(Runner $runner): void
+    public function execute(RequestEmitter $runner): void
     {
         // todo move it to another class
         foreach ($this->tests as $item) {

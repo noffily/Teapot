@@ -7,7 +7,7 @@ namespace Noffily\Teapot\Core;
 use Psr\Http\Message\ResponseInterface;
 use Closure;
 
-final class Emitter
+final class ResponseEmitter
 {
     private Closure $responseEmitter;
 
