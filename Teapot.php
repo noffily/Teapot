@@ -27,17 +27,17 @@ final class Teapot
             $test = $item->getTest();
             $testClass = new $test();
 
-            if (empty($item->getCases())) {
+            $case = $item->getCase();
+            if (is_null($case)) {
                 echo sprintf('%s has no test cases: SKIPPING!', $test);
+                continue;
             }
 
-            foreach ($item->getCases() as $case) {
-                try {
-                    $testClass->$case($this->requestEmitter);
-                    echo sprintf('%s::%s: OK!', $test, $case) . PHP_EOL;
-                } catch (Throwable) {
-                    echo sprintf('%s::%s: FAILED!', $test, $case) . PHP_EOL;
-                }
+            try {
+                $testClass->$case($this->requestEmitter);
+                echo sprintf('%s::%s: OK!', $test, $case) . PHP_EOL;
+            } catch (Throwable) {
+                echo sprintf('%s::%s: FAILED!', $test, $case) . PHP_EOL;
             }
         }
     }

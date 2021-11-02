@@ -9,15 +9,22 @@ use Attribute;
 #[Attribute(Attribute::TARGET_METHOD|Attribute::IS_REPEATABLE)]
 class Depends
 {
-    private string $on;
+    private string $test;
+    private string $case;
 
-    public function __construct(string $on)
+    public function __construct(string $test, string $case)
     {
-        $this->on = $on;
+        $this->test = $test;
+        $this->case = $case;
     }
 
-    public function getOn(): string
+    public function getTest(): string
     {
-        return $this->on;
+        return $this->test;
+    }
+
+    public function getCase(): string
+    {
+        return $this->case;
     }
 }

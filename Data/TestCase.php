@@ -7,12 +7,14 @@ namespace Noffily\Teapot\Data;
 final class TestCase
 {
     private string $test;
-    private array $cases;
+    private ?string $case;
+    private array $depends;
 
-    public function __construct(string $test, array $cases = [])
+    public function __construct(string $test, ?string $case, array $depends = [])
     {
         $this->test = $test;
-        $this->cases = $cases;
+        $this->case = $case;
+        $this->depends = $depends;
     }
 
     /**
@@ -24,10 +26,15 @@ final class TestCase
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getCases(): array
+    public function getCase(): ?string
     {
-        return $this->cases;
+        return $this->case;
+    }
+
+    public function __toString(): string
+    {
+        return $this->getTest() . '::' . $this->getCase();
     }
 }

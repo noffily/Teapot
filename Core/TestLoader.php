@@ -10,6 +10,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionException;
 use SebastianBergmann\FileIterator\Facade;
+use Noffily\Teapot\Attribute\Depends;
 use Noffily\Teapot\Data\Config;
 use Noffily\Teapot\Data\TestCase;
 
@@ -33,12 +34,12 @@ final class TestLoader
         $tests = [];
         foreach ($testClasses as $testClass) {
             try {
-                $tests[] = $this->getTestCase($testClass);
+                $tests[] = $this->getTestCases($testClass);
             } catch (Throwable) {
                 continue;
             }
         }
-        return $tests;
+        return array_merge(...$tests);
     }
 
     /**
@@ -62,32 +63,22 @@ final class TestLoader
 
     /**
      * @param string $test
-     * @return TestCase
+     * @return array
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function getTestCase(string $test): TestCase
+    protected function getTestCases(string $test): array
     {
         $class = new ReflectionClass($test);
         if ($class->isAbstract() || $class->getConstructor()?->getNumberOfRequiredParameters() > 0) {
             throw new Exception(sprintf(
-            'Test class %s must not be an abstract and must have no required parameters.',
+                'Test class %s must not be an abstract and must have no required parameters.',
                 $test
             ));
         }
 
-        return new TestCase($test, $this->getTestMethods($class));
-    }
-
-    /**
-     * @param ReflectionClass $class
-     * @return array
-     */
-    protected function getTestMethods(ReflectionClass $class): array
-    {
         $cases = [];
         foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-
             if ($method->getNumberOfParameters() < 1 || $method->getNumberOfRequiredParameters() > 1) {
                 continue;
             }
@@ -96,8 +87,18 @@ final class TestLoader
                 continue;
             }
 
-            $cases[] = $method->getName();
+            $attributes = $method->getAttributes(Depends::class);
+            $depends = [];
+            foreach ($attributes as $attribute) {
+                $depends[] = $attribute->newInstance();
+            }
+            $cases[] = new TestCase($test, $method->getName(), $depends);
         }
+
+        if (empty($cases)) {
+            return [new TestCase($test, null)];
+        }
+
         return $cases;
     }
 }
