@@ -13,16 +13,20 @@ use SebastianBergmann\FileIterator\Facade;
 use Noffily\Teapot\Attribute\Depends;
 use Noffily\Teapot\Data\Config;
 use Noffily\Teapot\Data\TestCase;
+use Noffily\Teapot\Interface\ErrorCollectorInterface;
+use Noffily\Teapot\Exception\EmptyCasesException;
 
 final class TestLoader
 {
     private Config $config;
     private Facade $facade;
+    private ErrorCollectorInterface $errorCollector;
 
-    public function __construct(Config $config, Facade $facade)
+    public function __construct(Config $config, Facade $facade, ErrorCollectorInterface $errorCollector)
     {
         $this->config = $config;
         $this->facade = $facade;
+        $this->errorCollector = $errorCollector;
     }
 
     /**
@@ -35,11 +39,19 @@ final class TestLoader
         foreach ($testClasses as $testClass) {
             try {
                 $tests[] = $this->getTestCases($testClass);
+            } catch (EmptyCasesException $e) {
+                $this->errorCollector->addError($e->getMessage());
+                continue;
             } catch (Throwable) {
                 continue;
             }
         }
         return array_merge(...$tests);
+    }
+
+    public function getErrorCollector(): ErrorCollectorInterface
+    {
+        return $this->errorCollector;
     }
 
     /**
@@ -92,11 +104,13 @@ final class TestLoader
             foreach ($attributes as $attribute) {
                 $depends[] = $attribute->newInstance();
             }
-            $cases[] = new TestCase($test, $method->getName(), $depends);
+
+            $testCase = new TestCase($test, $method->getName(), $depends);
+            $cases[(string) $testCase] = $testCase;
         }
 
         if (empty($cases)) {
-            return [new TestCase($test, null)];
+            throw new EmptyCasesException(sprintf('%s has no test cases: SKIPPING!', $test));
         }
 
         return $cases;

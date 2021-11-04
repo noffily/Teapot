@@ -27,4 +27,9 @@ class Depends
     {
         return $this->case;
     }
+
+    public function __toString(): string
+    {
+        return $this->test . '::' . $this->case;
+    }
 }

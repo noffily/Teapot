@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Noffily\Teapot;
 
 use Throwable;
+use Noffily\Teapot\Core\ErrorCollector;
+use Noffily\Teapot\Core\TestSorter;
 use Noffily\Teapot\Core\TestLoader;
 use Noffily\Teapot\Core\RequestEmitter;
 use Noffily\Teapot\Data\Config;
@@ -18,21 +20,26 @@ final class Teapot
     public function __construct(RequestEmitter $requestEmitter, Config $config)
     {
         $this->requestEmitter = $requestEmitter;
-        $this->loader = new TestLoader($config, new Facade());
+        $this->loader = new TestLoader($config, new Facade(), new ErrorCollector());
     }
 
     public function run(): void
     {
-        foreach ($this->loader->getTests() as $item) {
+        $tests = $this->loader->getTests();
+        foreach ($this->loader->getErrorCollector()->getErrors() as $error) {
+            echo $error . PHP_EOL;
+        }
+
+        $sorter = new TestSorter($tests, new ErrorCollector());
+        $sorter->sort();
+        foreach ($sorter->getErrorCollector()->getErrors() as $error) {
+            echo $error . PHP_EOL;
+        }
+
+        foreach ($sorter->getSortedTests() as $item) {
             $test = $item->getTest();
-            $testClass = new $test();
-
             $case = $item->getCase();
-            if (is_null($case)) {
-                echo sprintf('%s has no test cases: SKIPPING!', $test);
-                continue;
-            }
-
+            $testClass = new $test();
             try {
                 $testClass->$case($this->requestEmitter);
                 echo sprintf('%s::%s: OK!', $test, $case) . PHP_EOL;
