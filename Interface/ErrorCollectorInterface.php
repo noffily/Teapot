@@ -6,11 +6,11 @@ namespace Noffily\Teapot\Interface;
 
 interface ErrorCollectorInterface
 {
-    public function addError(string $error): void;
+    public function add(string $error): void;
 
-    public function hasErrors(): bool;
+    public function has(): bool;
 
-    public function getErrors(): array;
+    public function get(): array;
 
-    public function resetErrors(): void;
+    public function reset(): void;
 }

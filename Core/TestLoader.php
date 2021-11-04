@@ -41,7 +41,7 @@ final class TestLoader
             try {
                 $tests[] = $this->getTestCases($testClass);
             } catch (EmptyCasesException $e) {
-                $this->errorCollector->addError($e->getMessage());
+                $this->errorCollector->add($e->getMessage());
                 continue;
             } catch (Throwable) {
                 continue;

@@ -26,13 +26,13 @@ final class Teapot
     public function run(): void
     {
         $tests = $this->loader->getTests();
-        foreach ($this->loader->getErrorCollector()->getErrors() as $error) {
+        foreach ($this->loader->getErrorCollector()->get() as $error) {
             echo $error . PHP_EOL;
         }
 
         $sorter = new TestSorter($tests, new ErrorCollector());
         $sorter->sort();
-        foreach ($sorter->getErrorCollector()->getErrors() as $error) {
+        foreach ($sorter->getErrorCollector()->get() as $error) {
             echo $error . PHP_EOL;
         }
 

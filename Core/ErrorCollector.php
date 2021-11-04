@@ -6,26 +6,26 @@ namespace Noffily\Teapot\Core;
 
 use Noffily\Teapot\Interface\ErrorCollectorInterface;
 
-class ErrorCollector implements ErrorCollectorInterface
+final class ErrorCollector implements ErrorCollectorInterface
 {
     private array $errors = [];
 
-    public function addError(string $error): void
+    public function add(string $error): void
     {
         $this->errors[] = $error;
     }
 
-    public function hasErrors(): bool
+    public function has(): bool
     {
         return count($this->errors) > 0;
     }
 
-    public function getErrors(): array
+    public function get(): array
     {
         return $this->errors;
     }
 
-    public function resetErrors(): void
+    public function reset(): void
     {
         $this->errors = [];
     }

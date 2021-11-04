@@ -31,12 +31,12 @@ final class TestSorter
     public function sort(): void
     {
         $this->sortedTests = [];
-        $this->errorCollector->resetErrors();
+        $this->errorCollector->reset();
         foreach ($this->tests as $test) {
             try {
                 $this->process($test);
             } catch (TeapotException $e) {
-                $this->errorCollector->addError($e->getMessage());
+                $this->errorCollector->add($e->getMessage());
             }
         }
     }
