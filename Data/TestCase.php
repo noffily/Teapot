@@ -9,13 +9,20 @@ final class TestCase
     private string $test;
     private string $case;
     private array $depends;
+    private bool $skipped;
     private bool $sortProcessed;
 
-    public function __construct(string $test, string $case, array $depends = [], bool $sortProcessed = false)
-    {
+    public function __construct(
+        string $test,
+        string $case,
+        array $depends = [],
+        bool $skipped = false,
+        bool $sortProcessed = false
+    ) {
         $this->test = $test;
         $this->case = $case;
         $this->depends = $depends;
+        $this->skipped = $skipped;
         $this->sortProcessed = $sortProcessed;
     }
 
@@ -40,14 +47,19 @@ final class TestCase
         return $this->sortProcessed;
     }
 
-    public function markSortProcessed(): void
-    {
-        $this->sortProcessed = true;
-    }
-
     public function getDepends(): array
     {
         return $this->depends;
+    }
+
+    public function isSkipped(): bool
+    {
+        return $this->skipped;
+    }
+
+    public function markSortProcessed(): void
+    {
+        $this->sortProcessed = true;
     }
 
     /**

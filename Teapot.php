@@ -37,14 +37,17 @@ final class Teapot
         }
 
         foreach ($sorter->getSortedTests() as $item) {
+            if ($item->isSkipped()) {
+                echo sprintf('%s: SKIPPED!', $item) . PHP_EOL;
+            }
             $test = $item->getTest();
             $case = $item->getCase();
             $testClass = new $test();
             try {
                 $testClass->$case($this->requestEmitter);
-                echo sprintf('%s::%s: OK!', $test, $case) . PHP_EOL;
+                echo sprintf('%s: OK!', $item) . PHP_EOL;
             } catch (Throwable) {
-                echo sprintf('%s::%s: FAILED!', $test, $case) . PHP_EOL;
+                echo sprintf('%s: FAILED!', $item) . PHP_EOL;
             }
         }
     }

@@ -11,6 +11,7 @@ use ReflectionMethod;
 use ReflectionException;
 use SebastianBergmann\FileIterator\Facade;
 use Noffily\Teapot\Attribute\Depends;
+use Noffily\Teapot\Attribute\Skipped;
 use Noffily\Teapot\Data\Config;
 use Noffily\Teapot\Data\TestCase;
 use Noffily\Teapot\Interface\ErrorCollectorInterface;
@@ -99,13 +100,13 @@ final class TestLoader
                 continue;
             }
 
-            $attributes = $method->getAttributes(Depends::class);
+            $dependsAttributes = $method->getAttributes(Depends::class);
             $depends = [];
-            foreach ($attributes as $attribute) {
-                $depends[] = $attribute->newInstance();
+            foreach ($dependsAttributes as $dependsAttribute) {
+                $depends[] = $dependsAttribute->newInstance();
             }
-
-            $testCase = new TestCase($test, $method->getName(), $depends);
+            $skipped = count($method->getAttributes(Skipped::class)) > 0;
+            $testCase = new TestCase($test, $method->getName(), $depends, $skipped);
             $cases[(string) $testCase] = $testCase;
         }
 
