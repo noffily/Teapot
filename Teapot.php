@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Noffily\Teapot;
 
 use Throwable;
+use Noffily\Teapot\Core\CliOutput;
 use Noffily\Teapot\Core\ErrorCollector;
 use Noffily\Teapot\Core\TestSorter;
 use Noffily\Teapot\Core\TestLoader;
@@ -16,11 +17,13 @@ final class Teapot
 {
     private RequestEmitter $requestEmitter;
     private TestLoader $loader;
+    private CliOutput $cliOutput;
 
     public function __construct(RequestEmitter $requestEmitter, Config $config)
     {
         $this->requestEmitter = $requestEmitter;
         $this->loader = new TestLoader($config, new Facade(), new ErrorCollector());
+        $this->cliOutput = new CliOutput();
     }
 
     public function run(): void
@@ -37,17 +40,38 @@ final class Teapot
         }
 
         foreach ($sorter->getSortedTests() as $item) {
+            $this->cliOutput->resetCount()->progress()->text(sprintf(' %s:', $item));
+            $outputCount = $this->cliOutput->count();
             if ($item->isSkipped()) {
-                echo sprintf('%s: SKIPPED!', $item) . PHP_EOL;
+                $this->cliOutput
+                    ->backspace($outputCount)
+                    ->cyan()
+                    ->skipped()
+                    ->text(sprintf(' %s: SKIPPED!', $item))
+                    ->reset()
+                    ->newLine();
+                continue;
             }
             $test = $item->getTest();
             $case = $item->getCase();
             $testClass = new $test();
             try {
                 $testClass->$case($this->requestEmitter);
-                echo sprintf('%s: OK!', $item) . PHP_EOL;
+                $this->cliOutput
+                    ->backspace($outputCount)
+                    ->green()
+                    ->passed()
+                    ->text(sprintf(' %s: PASSED!', $item))
+                    ->reset()
+                    ->newLine();
             } catch (Throwable) {
-                echo sprintf('%s: FAILED!', $item) . PHP_EOL;
+                $this->cliOutput
+                    ->backspace($outputCount)
+                    ->red()
+                    ->failed()
+                    ->text(sprintf(' %s: FAILED!', $item))
+                    ->reset()
+                    ->newLine();
             }
         }
     }

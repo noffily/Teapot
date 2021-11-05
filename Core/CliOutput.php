@@ -21,10 +21,18 @@ final class CliOutput
     private const SKIPPED_SYMBOL = '↩';
     private const INCOMPLETE_SYMBOL = '∅';
 
-    public function output(string $text): self
+    private int $outputCount = 0;
+    private bool $colorsEnabled;
+
+    public function __construct(bool $colorsEnabled = true)
     {
-        echo $text;
-        return $this;
+        $this->colorsEnabled = $colorsEnabled;
+    }
+
+    public function text(string $text): self
+    {
+        $this->outputCount += strlen($text);
+        return $this->output($text);
     }
 
     public function backspace(int $times): self
@@ -39,7 +47,7 @@ final class CliOutput
 
     public function reset(): self
     {
-        return $this->output(self::RESET);
+        return $this->outputColor(self::RESET);
     }
 
     public function red(): self
@@ -64,31 +72,56 @@ final class CliOutput
 
     public function progress(): self
     {
+        ++$this->outputCount;
         return $this->output(self::PROCESS_SYMBOL);
     }
 
     public function passed(): self
     {
+        ++$this->outputCount;
         return $this->output(self::PASSED_SYMBOL);
     }
 
     public function failed(): self
     {
+        ++$this->outputCount;
         return $this->output(self::FAILED_SYMBOL);
     }
 
     public function skipped(): self
     {
+        ++$this->outputCount;
         return $this->output(self::SKIPPED_SYMBOL);
     }
 
     public function incomplete(): self
     {
+        ++$this->outputCount;
         return $this->output(self::INCOMPLETE_SYMBOL);
+    }
+
+    public function count(): int
+    {
+        return $this->outputCount;
+    }
+
+    public function resetCount(): self
+    {
+        $this->outputCount = 0;
+        return $this;
     }
 
     protected function outputColor(string $color): self
     {
+        if (!$this->colorsEnabled) {
+            return $this;
+        }
         return $this->output(self::ESCAPE . '[' . $color . 'm');
+    }
+
+    protected function output(string $text): self
+    {
+        echo $text;
+        return $this;
     }
 }
