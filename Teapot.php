@@ -60,10 +60,10 @@ final class Teapot
                 continue;
             }
 
-            if (array_intersect_key($item->getDepends(), $this->failed)
-                || array_intersect_key($item->getDepends(), $this->skipped)
-                || array_intersect_key($item->getDepends(), $this->incomplete)
-            ) {
+            if (array_intersect_key(
+                $item->getDepends(),
+                array_merge($this->failed, $this->skipped, $this->incomplete)
+            )) {
                 $this->incomplete[(string) $item] = $item;
                 $this->cliOutput
                     ->backspace($outputCount)
