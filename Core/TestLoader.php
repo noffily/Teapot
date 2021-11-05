@@ -103,7 +103,8 @@ final class TestLoader
             $dependsAttributes = $method->getAttributes(Depends::class);
             $depends = [];
             foreach ($dependsAttributes as $dependsAttribute) {
-                $depends[] = $dependsAttribute->newInstance();
+                $dependsInstance = $dependsAttribute->newInstance();
+                $depends[(string) $dependsInstance] = $dependsInstance;
             }
             $skipped = count($method->getAttributes(Skipped::class)) > 0;
             $testCase = new TestCase($test, $method->getName(), $depends, $skipped);

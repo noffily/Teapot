@@ -12,7 +12,7 @@ final class CliOutput
     private const RESET = '0';
     private const RED_FG = '1;31';
     private const GREEN_FG = '1;32';
-    private const YELLOW_FG = '1;36';
+    private const YELLOW_FG = '1;33';
     private const CYAN_FG = '1;36';
 
     private const PROCESS_SYMBOL = '→';
@@ -20,6 +20,7 @@ final class CliOutput
     private const FAILED_SYMBOL = '✘';
     private const SKIPPED_SYMBOL = '↩';
     private const INCOMPLETE_SYMBOL = '∅';
+    private const RESULTS_SYMBOL = '★';
 
     private int $outputCount = 0;
     private bool $colorsEnabled;
@@ -98,6 +99,12 @@ final class CliOutput
     {
         ++$this->outputCount;
         return $this->output(self::INCOMPLETE_SYMBOL);
+    }
+
+    public function results(): self
+    {
+        ++$this->outputCount;
+        return $this->output(self::RESULTS_SYMBOL);
     }
 
     public function count(): int

@@ -19,6 +19,12 @@ final class Teapot
     private TestLoader $loader;
     private CliOutput $cliOutput;
 
+    // todo refactoring
+    private array $failed = [];
+    private array $skipped = [];
+    private array $passed = [];
+    private array $incomplete = [];
+
     public function __construct(RequestEmitter $requestEmitter, Config $config)
     {
         $this->requestEmitter = $requestEmitter;
@@ -30,19 +36,20 @@ final class Teapot
     {
         $tests = $this->loader->getTests();
         foreach ($this->loader->getErrorCollector()->get() as $error) {
-            echo $error . PHP_EOL;
+            $this->cliOutput->red()->failed()->text($error)->newLine();
         }
 
         $sorter = new TestSorter($tests, new ErrorCollector());
         $sorter->sort();
         foreach ($sorter->getErrorCollector()->get() as $error) {
-            echo $error . PHP_EOL;
+            $this->cliOutput->red()->failed()->text($error)->newLine();
         }
 
         foreach ($sorter->getSortedTests() as $item) {
             $this->cliOutput->resetCount()->progress()->text(sprintf(' %s:', $item));
             $outputCount = $this->cliOutput->count();
             if ($item->isSkipped()) {
+                $this->skipped[(string) $item] = $item;
                 $this->cliOutput
                     ->backspace($outputCount)
                     ->cyan()
@@ -52,11 +59,28 @@ final class Teapot
                     ->newLine();
                 continue;
             }
+
+            if (array_intersect_key($item->getDepends(), $this->failed)
+                || array_intersect_key($item->getDepends(), $this->skipped)
+                || array_intersect_key($item->getDepends(), $this->incomplete)
+            ) {
+                $this->incomplete[(string) $item] = $item;
+                $this->cliOutput
+                    ->backspace($outputCount)
+                    ->yellow()
+                    ->incomplete()
+                    ->text(sprintf(' %s: INCOMPLETE!', $item))
+                    ->reset()
+                    ->newLine();
+                continue;
+            }
+
             $test = $item->getTest();
             $case = $item->getCase();
             $testClass = new $test();
             try {
                 $testClass->$case($this->requestEmitter);
+                $this->passed[(string) $item] = $item;
                 $this->cliOutput
                     ->backspace($outputCount)
                     ->green()
@@ -65,6 +89,7 @@ final class Teapot
                     ->reset()
                     ->newLine();
             } catch (Throwable) {
+                $this->failed[(string) $item] = $item;
                 $this->cliOutput
                     ->backspace($outputCount)
                     ->red()
@@ -74,5 +99,30 @@ final class Teapot
                     ->newLine();
             }
         }
+        $this->cliOutput->newLine()->results()->text(' RESULTS:')->newLine();
+        $this->cliOutput
+            ->green()
+            ->passed()
+            ->text(sprintf(' Count passed: %d', count($this->passed)))
+            ->reset()
+            ->newLine();
+        $this->cliOutput
+            ->red()
+            ->failed()
+            ->text(sprintf(' Count failed: %d', count($this->failed)))
+            ->reset()
+            ->newLine();
+        $this->cliOutput
+            ->cyan()
+            ->skipped()
+            ->text(sprintf(' Count skipped: %d', count($this->skipped)))
+            ->reset()
+            ->newLine();
+        $this->cliOutput
+            ->yellow()
+            ->incomplete()
+            ->text(sprintf(' Count incomplete: %d', count($this->incomplete)))
+            ->reset()
+            ->newLine();
     }
 }
